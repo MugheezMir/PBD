@@ -1,0 +1,33 @@
+for checking flume install and version
+
+1)flume-ng help
+
+2)flume-ng version
+
+
+
+
+for start all demons
+1) cd..
+2) cd..
+3) hdfs namenode -format
+4) cd hadoop-3.3.0/sbin
+5) start-dfs
+6) start-yarn
+
+for fetching twitter data
+
+7) cd..
+7) cd..
+8) cd apache-flume-1.9.0-bin
+9)flume-ng help
+
+flume-ng version
+
+flume-ng agent -n TwitterAgent -c conf -f C:/apache-flume-1.9.0-bin/conf/twitter.conf -property flume.root.logger=DEBUG,console
+
+
+
+
+
+
