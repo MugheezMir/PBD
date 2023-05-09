@@ -1,0 +1,227 @@
+
+insert:
+
+public function insert(Request $request)
+    {
+        $request->validate(
+            [
+                "name"=>'required|unique:posts',
+                "model"=>'required|unique:posts',
+                "price"=>'required|unique:posts',
+                "sname"=>'required|unique:posts',
+                "email"=>'nullable',
+                "phone"=>'required|unique:posts',
+            ]
+        );
+
+        $sql = DB::table('posts')->insert(
+            [
+                'name'=>$request->input('name'),
+                'model'=>$request->input('model'),
+                'price'=>$request->input('price'),
+                'sname'=>$request->input('sname'),
+                'email'=>$request->input('email'),
+                'phone'=>$request->input('phone')
+
+            ]
+        );
+        if($sql)
+        {
+            return redirect('/');
+        }
+    }
+
+
+delete:
+
+      public function delete($id)
+    {
+
+        $del = DB::table('posts')
+
+
+            ->where('id', $id)
+            ->delete();
+
+        return redirect('/');
+          
+        
+    }
+
+
+update:
+
+
+    public function edit($id)
+    {
+
+        $row = DB::table('posts')
+            ->where('id', $id)
+            ->first();
+            $data=[
+                "info"=>$row
+            ];
+
+        return view('update', $data);
+
+    }
+
+    public function update(Request $request)
+    {
+        $request->validate(
+            [
+                "name"=>'required|unique:posts',
+                "model"=>'required|unique:posts',
+                "price"=>'required|unique:posts',
+                "sname"=>'required|unique:posts',
+                
+                "phone"=>'required|unique:posts',
+            ]
+        );
+
+        $edit = DB::table('posts')
+            ->where('id', $request->input('cid'))
+            ->update([
+                'name' => $request->input('name'),
+                'model' => $request->input('model'),
+                'price' => $request->input('price'),
+                'sname' => $request->input('sname'),
+                'email' => $request->input('email', 'L1F20BSCS0690'),
+                'phone' => $request->input('phone')
+            ]);
+
+
+sign up:
+
+
+  public function signup(Request $request)
+    {
+        $request->validate(
+            [
+                "username" => 'required',
+                "email" => 'required|email|unique:alloweds',
+                "password" => 'required',
+                "cpass" => 'required'
+
+            ]
+        );
+
+        $user = new allowed();
+        $user->username = $request->username;
+        $user->email = $request->email;
+        $user->password = Hash::make($request->password); //encrypt password
+        $res = $user->save();
+
+        if ($res) {
+            return back()->with('success', 'You have Registered Successfully');
+        } else {
+            return back()->with('failed', 'Registration failed');
+        }
+
+    }
+
+
+
+signin:
+
+ public function logincheck(Request $request)
+    {
+        $request->validate(
+            [
+                "email" => 'required|email',
+                "password" => 'required',
+            ]
+        );
+
+        $user = allowed::where('email', '=', $request->email)->first();
+        if ($user) {
+            if (Hash::check($request->password, $user->password)) {
+                $request->session()->put('loginid', $user->id);
+                return redirect('home');
+
+            } else {
+                return back()->with('failed', 'password is wrong');
+            }
+
+        } else {
+            return back()->with('failed', 'email doesnt exists');
+        }
+
+
+
+    }
+
+
+image input:
+
+ $books->price = $request->input('price');
+
+        if ($request->hasfile('image')) {
+            $file = $request->file('image');
+            $extension = $file->getClientOriginalExtension();
+            $filename = time() . '.' . $extension;
+            $file->move('uploads/books/', $filename);
+            $books->image = $filename;
+
+        }
+        $books->save();
+
+
+foreach display :
+
+  public function home()
+    {
+        $products=DB::table('products')->get();
+        return view('home',['products'=>$products]);
+
+    }
+
+
+seeder:
+
+use Illuminate\Database\Seeder;
+use App\Models\countries;
+use Faker\Factory as faker;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+
+class countriesseeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        $faker = Faker::create();
+        for ($i = 0; $i < 20; $i++) {
+            $data = [
+                'name' => $faker->country(),
+                'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                'updated_at' => Carbon::now()->format('Y-m-d H:i:s')
+            ];
+            DB::table('countries')->insert($data);
+        }
+    }
+}
+
+
+
+how to secure sign up:
+
+
+create middleware:
+
+ if(!Session()->has('loginid'))
+        {
+            return redirect('login')->with('failed','You have to login first to access Website');
+        }
+        return $next($request);
+    }
+
+
+go to kernal.php in middle
+ 'loggedin' => \App\Http\Middleware\authcheck::class,
+
+go to routes:
+
+route::get('/home',[pagecontroller::class,'home'])->middleware('loggedin');
